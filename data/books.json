@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "title": "Cien años de soledad",
+    "author": "Gabriel García Márquez",
+    "year": 1967
+  },
+  {
+    "id": "2",
+    "title": "El Aleph",
+    "author": "Jorge Luis Borges",
+    "year": 1949
+  },
+  {
+    "id": "16191e74-814f-45a9-b82f-d0b6e6eac533",
+    "title": "dracula",
+    "author": "bram stoker",
+    "year": null
+  },
+  {
+    "id": "dd9ec737-76d1-4987-a8f8-4420a9cc21ff",
+    "title": "Los tres mundos (Serie Julio César 3)",
+    "author": "Santiago Posteguillo",
+    "year": 22019
+  }
+]

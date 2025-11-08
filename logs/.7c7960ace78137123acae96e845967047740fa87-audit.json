@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\library-nodejs-mini\\logs\\.7c7960ace78137123acae96e845967047740fa87-audit.json",
+    "files": [
+        {
+            "date": 1762584026056,
+            "name": "C:\\library-nodejs-mini\\logs\\2025-11-08-server.log",
+            "hash": "e003b70dc591f90968fae2325b25ea048a55b8f042ae9971c3120a5a8651b9ae"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Library API - Node.js Mini</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f8f9fa; color:#222; margin:20px; }
+    .card { background:white; padding:16px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:12px; }
+    button { padding:8px 12px; margin:5px; border:none; border-radius:6px; cursor:pointer; background:#007acc; color:white; }
+    input { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
+    pre { background:#f4f4f4; padding:12px; border-radius:8px; overflow:auto; max-height:300px; }
+    .row { display:flex; gap:12px; align-items:center; }
+  </style>
+</head>
+<body>
+  <h1>📚 Library API — Node.js Mini</h1>
+
+  <div class="card">
+    <strong>Libros totales: </strong><span id="counter">0</span>
+  </div>
+
+  <div class="card">
+    <h3>Crear libro</h3>
+    <form id="bookForm">
+      <input id="title" placeholder="Título" required />
+      <input id="author" placeholder="Autor" required />
+      <input id="year" placeholder="Año (opcional)" type="number" />
+      <div class="row">
+        <button type="submit">Crear</button>
+        <button type="button" id="btnRefresh">Refrescar lista</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Lista de libros</h3>
+    <pre id="output">Cargando...</pre>
+  </div>
+
+  <!-- Socket.IO client (servido automáticamente por el servidor) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const output = document.getElementById('output');
+    const counterEl = document.getElementById('counter');
+    const bookForm = document.getElementById('bookForm');
+    const btnRefresh = document.getElementById('btnRefresh');
+
+    // Función para actualizar UI con la lista
+    function showBooks(books) {
+      counterEl.textContent = books.length;
+      output.textContent = JSON.stringify(books, null, 2);
+    }
+
+    // Trae lista inicial
+    async function loadBooks() {
+      try {
+        const res = await fetch('/api/books');
+        const books = await res.json();
+        showBooks(books);
+      } catch (err) {
+        output.textContent = 'Error cargando libros: ' + err.message;
+      }
+    }
+
+    // Envío del formulario para crear libro
+    bookForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const author = document.getElementById('author').value.trim();
+      const yearVal = document.getElementById('year').value;
+      if (!title || !author) {
+        alert('Completa título y autor');
+        return;
+      }
+      const payload = { title, author, year: yearVal ? Number(yearVal) : undefined };
+      try {
+        const res = await fetch('/api/books', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Error: ' + (err.message || res.status));
+          return;
+        }
+        // Limpiamos form; la actualización real llegará por socket (o podemos llamar loadBooks())
+        bookForm.reset();
+      } catch (err) {
+        alert('Error al crear libro: ' + err.message);
+      }
+    });
+
+    btnRefresh.addEventListener('click', loadBooks);
+
+    // Inicializamos socket
+    const socket = io(); // se conecta al mismo origen
+
+    socket.on('connect', () => {
+      console.log('Socket conectado', socket.id);
+    });
+
+    // escuchamos el evento que emite el backend
+    socket.on('booksUpdated', (payload) => {
+      // payload: { count, books }
+      if (payload && payload.books) {
+        showBooks(payload.books);
+      } else if (payload && typeof payload.count === 'number') {
+        counterEl.textContent = payload.count;
+      } else {
+        // fallback: recargar lista
+        loadBooks();
+      }
+    });
+
+    // Carga inicial
+    loadBooks();
+  </script>
+</body>
+</html>
+
+
+// Qué hace este archivo: //
+// Muestra contador y lista. //
+// Formulario POST /api/books para crear libros. //
+// Se conecta por sockets y actualiza counter y output cuando recibe booksUpdated. //
+// Si la actualización no llega, podés usar "Refrescar lista". //
